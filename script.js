@@ -1,3 +1,6 @@
+const datePicker = document.getElementById('date-picker');
+const notificationHolder = document.querySelector('#notify');
+
 async function getData(url) {
     const response = await axios(`${url}`);
 
@@ -21,7 +24,7 @@ function customHttp() {
 const http = customHttp();
 
 const nasaService = (function() {
-    const url = "https://api.nasa.gov/planetary/apod?";
+    const url = 'https://api.nasa.gov/planetary/apod?';
     const api_key = 'api_key=gOtT61jj844yLTungiRyO4qZWmKxTVDxMgpX8g73';
 
     return {
@@ -34,6 +37,11 @@ const nasaService = (function() {
     };
 })();
 
+Date.prototype.monthDays = function() {
+    const d = new Date(this.getFullYear(), this.getMonth() + 1, 0);
+    return d.getDate();
+}
+
 function onGetResponse(err, res) {
     removePreloader();
 
@@ -44,11 +52,6 @@ function onGetResponse(err, res) {
 
     renderNasa(res);
     showAlert('Enjoy!');
-}
-
-Date.prototype.monthDays = function() {
-    const d = new Date(this.getFullYear(), this.getMonth() + 1, 0);
-    return d.getDate();
 }
 
 function loadPictures() {
@@ -69,14 +72,14 @@ function loadPictures() {
         days = new Date().getDate();
     }
 
-    const start_date = "&start_date=" + datePicker.value + "-01";
-    const end_date = "&end_date=" + datePicker.value + "-" + days;
+    const start_date = '&start_date=' + datePicker.value + '-01';
+    const end_date = '&end_date=' + datePicker.value + '-' + days;
 
     nasaService.monthPictures(start_date, end_date, onGetResponse);
 }
 
 function renderNasa(elements) {
-    const nasaContainer = document.querySelector(".grid-row");
+    const nasaContainer = document.querySelector('.grid-row');
     if (nasaContainer.children.length) {
         clearContainer(nasaContainer);
     }
@@ -84,18 +87,18 @@ function renderNasa(elements) {
     let fragment = ``;
     if(Array.isArray(elements)) {
         elements.forEach(nasaItem => {
-            const el = nasaTemplate(nasaItem);
+            const el = getNasaTemplate(nasaItem);
             fragment += el;
         });
     }
     else {
-        fragment = nasaTemplate(elements);
+        fragment = getNasaTemplate(elements);
     }
 
     nasaContainer.insertAdjacentHTML('afterbegin', fragment);
 }
 
-function nasaTemplate({ title, explanation, date, url, hdurl, media_type}) {
+function getNasaTemplate({ title, explanation, date, url, hdurl, media_type}) {
     if(media_type === 'image') {
         return `
         <div class="card">
@@ -142,21 +145,18 @@ function clearContainer(container) {
     }
 }
 
-const datePicker = document.getElementById("date-picker");
-const notificationHolder = document.querySelector("#notify");
-
 function showAlert(msg, type = 'success') {
-    document.dispatchEvent(new CustomEvent("notify", {
+    document.dispatchEvent(new CustomEvent('notify', {
         detail: { msg: msg, type: type }
     }));
 
     setTimeout(() => {
-        notificationHolder.innerHTML = "";
+        notificationHolder.innerHTML = '';
     }, 2500);
 }
 
 function showPreloader() {
-    const nasaContainer = document.querySelector(".grid-row");
+    const nasaContainer = document.querySelector('.grid-row');
     if (nasaContainer.children.length) {
         clearContainer(nasaContainer);
     }
@@ -182,21 +182,21 @@ function removePreloader() {
     }
 }
 
-datePicker.addEventListener("change", (e) => {
+datePicker.addEventListener('change', (e) => {
     e.preventDefault();
     loadPictures();
 });
 
-document.addEventListener("notify", (e) => {
-    const container = document.createElement("div");
+document.addEventListener('notify', (e) => {
+    const container = document.createElement('div');
 
-    container.classList.add("notification-container");
+    container.classList.add('notification-container');
     container.innerHTML = e.detail.msg;
 
-    notificationHolder.insertAdjacentElement("beforeend", container);
+    notificationHolder.insertAdjacentElement('beforeend', container);
 });
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener('DOMContentLoaded', function() {
     datePicker.value = localStorage.selectedDate;
     loadPictures();
 });
